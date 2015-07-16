@@ -2,16 +2,16 @@ require 'hipchat'
 
 namespace :hipchat do
 
-  task :notify_deploy_started do
+  task :notify_deploy_started, on_error: on_notification_failure do
     send_message("#{human} is deploying #{deployment_name} to #{environment_string}.", send_options)
   end
 
-  task :notify_deploy_finished do
+  task :notify_deploy_finished, on_error: on_notification_failure do
     send_options.merge!(:color => success_message_color)
     send_message("#{human} finished deploying #{deployment_name} to #{environment_string}.", send_options)
   end
 
-  task :notify_deploy_reverted do
+  task :notify_deploy_reverted, on_error: on_notification_failure do
     send_options.merge!(:color => failed_message_color)
     send_message("#{human} cancelled deployment of #{deployment_name} to #{environment_string}.", send_options)
   end
@@ -99,6 +99,10 @@ namespace :hipchat do
 
   def deploy_user
     fetch(:hipchat_deploy_user, 'Deploy')
+  end
+
+  def on_notification_failure
+    fetch(:hipchat_on_notification_failure, 'abort').to_sym
   end
 
   def human
